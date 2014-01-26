@@ -1,0 +1,24 @@
+body {
+  background-image: url('../assets/mesh.jpg');
+  background-size: cover;
+}
+
+#title {
+  text-align: center;
+  color: #fff;
+}
+
+#login {
+  width: 300px;
+  height: 150px;
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -75px;
+  margin-left: -150px;
+  padding: 10px;
+
+  background-color: #396696;
+  box-shadow: -3px 3px 10px #000;
+}
