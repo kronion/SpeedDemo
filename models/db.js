@@ -1,6 +1,10 @@
 /* Mongoose */
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/speedDemo');
+var uristring =
+  process.env.MONGOLAB_URI ||
+  process.env.MONGOHQ_URL ||
+  'mongodb://localhost/speedDemo';
+mongoose.connect(uristring);
 var db = mongoose.connection;
 exports.connect = db;
 

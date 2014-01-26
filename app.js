@@ -4,6 +4,9 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 
+/* Port */
+var port = process.env.PORT || 1337;
+
 /* Mongoose DB */
 var db = require('./models/db');
 var connect = db.connect;
@@ -108,4 +111,4 @@ connect.once('open', function callback() {
   });
 });
 
-server.listen(1337);
+server.listen(port);
