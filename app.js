@@ -23,8 +23,8 @@ app.use(express.urlencoded());
 app.use(express.cookieParser());
 app.use(express.session({store: new MongoStore({
                            db: 'localstore',
-                           host: '127.0.0.1',
-                           port: 27017 
+                           host: db.uristring,
+                           port: 27699
                          }),
                          secret: 'old nassau'}));
 
