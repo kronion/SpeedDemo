@@ -1,149 +1,154 @@
 <html>
-<script src="/socket.io/socket.io.js"></script>
-<script type="text/javascript">
-var canvas, ctx, flag = false,
-    prevX = 0,
-    currX = 0,
-    prevY = 0,
-    currY = 0,
-    dot_flag = false;
+  <head>
+    <link rel='stylesheet' type='text/css' href='css/drawing.css'/>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+    var canvas, ctx, flag = false,
+        prevX = 0,
+        currX = 0,
+        prevY = 0,
+        currY = 0,
+        dot_flag = false;
 
-var x = "black",
-    y = 2;
+    var x = "black",
+        y = 2;
 
-var socket = io.connect('http://localhost:1337');
+    var socket = io.connect('http://localhost:1337');
 
-function init() {
-    canvas = document.getElementById('can');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    ctx = canvas.getContext("2d");
-    w = canvas.width;
-    h = canvas.height;
+    function init() {
+        canvas = document.getElementById('can');
+        canvas.width = 10000;
+        canvas.height = 10000;
+        ctx = canvas.getContext("2d");
+        w = canvas.width;
+        h = canvas.height;
 
-    canvas.addEventListener("mousemove", function (e) {
-        findxy('move', e)
-    }, false);
-    canvas.addEventListener("mousedown", function (e) {
-        findxy('down', e)
-    }, false);
-    canvas.addEventListener("mouseup", function (e) {
-        findxy('up', e)
-    }, false);
-    canvas.addEventListener("mouseout", function (e) {
-        findxy('out', e)
-    }, false);
-}
-
-function color(obj) {
-    switch (obj.id) {
-        case "green":
-            x = "green";
-            break;
-        case "blue":
-            x = "blue";
-            break;
-        case "red":
-            x = "red";
-            break;
-        case "yellow":
-            x = "yellow";
-            break;
-        case "orange":
-            x = "orange";
-            break;
-        case "black":
-            x = "black";
-            break;
-        case "white":
-            x = "white";
-            break;
+        canvas.addEventListener("mousemove", function (e) {
+            findxy('move', e)
+        }, false);
+        canvas.addEventListener("mousedown", function (e) {
+            findxy('down', e)
+        }, false);
+        canvas.addEventListener("mouseup", function (e) {
+            findxy('up', e)
+        }, false);
+        canvas.addEventListener("mouseout", function (e) {
+            findxy('out', e)
+        }, false);
     }
-    if (x == "white") y = 14;
-    else y = 2;
 
-}
+    function color(obj) {
+        switch (obj.id) {
+            case "green":
+                x = "green";
+                break;
+            case "blue":
+                x = "blue";
+                break;
+            case "red":
+                x = "red";
+                break;
+            case "yellow":
+                x = "yellow";
+                break;
+            case "orange":
+                x = "orange";
+                break;
+            case "black":
+                x = "black";
+                break;
+            case "white":
+                x = "white";
+                break;
+        }
+        if (x == "white") y = 14;
+        else y = 2;
 
-function draw() {
-    ctx.beginPath();
-    ctx.moveTo(prevX, prevY);
-    ctx.lineTo(currX, currY);
-    ctx.strokeStyle = x;
-    ctx.lineWidth = y;
-    ctx.stroke();
-    ctx.closePath();
-}
-
-function erase() {
-    var m = confirm("Want to clear?");
-    if (m) {
-        ctx.clearRect(0, 0, w, h);
-        document.getElementById("canvasimg").style.display = "none";
     }
-}
 
-function findxy(res, e) {
-    if (res == 'down') {
-        prevX = currX;
-        prevY = currY;
-        currX = e.clientX - canvas.offsetLeft;
-        currY = e.clientY - canvas.offsetTop;
-        socket.emit('down', { x: x, currX: currX, currY: currY });
+    function draw() {
+        ctx.beginPath();
+        ctx.moveTo(prevX, prevY);
+        ctx.lineTo(currX, currY);
+        ctx.strokeStyle = x;
+        ctx.lineWidth = y;
+        ctx.stroke();
+        ctx.closePath();
+    }
 
-        flag = true;
-        dot_flag = true;
-        if (dot_flag) {
-            ctx.beginPath();
-            ctx.fillStyle = x;
-            ctx.fillRect(currX, currY, 2, 2);
-            ctx.closePath();
-            dot_flag = false;
+    function erase() {
+        var m = confirm("Want to clear?");
+        if (m) {
+            ctx.clearRect(0, 0, w, h);
+            document.getElementById("canvasimg").style.display = "none";
         }
     }
-    if (res == 'up' || res == "out") {
-        flag = false;
-    }
-    if (res == 'move') {
-        if (flag) {
+
+    function findxy(res, e) {
+        if (res == 'down') {
             prevX = currX;
             prevY = currY;
             currX = e.clientX - canvas.offsetLeft;
             currY = e.clientY - canvas.offsetTop;
-            draw();
-            socket.emit('move', { x: x, y: y, currX: currX, currY: currY,
-                                  prevX: prevX, prevY: prevY });
+            socket.emit('down', { x: x, currX: currX, currY: currY });
+
+            flag = true;
+            dot_flag = true;
+            if (dot_flag) {
+                ctx.beginPath();
+                ctx.fillStyle = x;
+                ctx.fillRect(currX, currY, 2, 2);
+                ctx.closePath();
+                dot_flag = false;
+            }
+        }
+        if (res == 'up' || res == "out") {
+            flag = false;
+        }
+        if (res == 'move') {
+            if (flag) {
+                prevX = currX;
+                prevY = currY;
+                currX = e.clientX - canvas.offsetLeft;
+                currY = e.clientY - canvas.offsetTop;
+                draw();
+                socket.emit('move', { x: x, y: y, currX: currX, currY: currY,
+                                      prevX: prevX, prevY: prevY });
+            }
         }
     }
-}
 
-socket.on('down', function (data) {
-  ctx.beginPath();
-  ctx.fillStyle = data.x; 
-  ctx.fillRect(data.currX, data.currY, 2, 2);
-  ctx.closePath();
-});
+    socket.on('down', function (data) {
+      ctx.beginPath();
+      ctx.fillStyle = data.x; 
+      ctx.fillRect(data.currX, data.currY, 2, 2);
+      ctx.closePath();
+    });
 
-socket.on('move', function (data) {
-  ctx.beginPath();
-  ctx.moveTo(data.prevX, data.prevY);
-  ctx.lineTo(data.currX, data.currY);
-  ctx.strokeStyle = data.x;
-  ctx.lineWidth = data.y;
-  ctx.stroke();
-  ctx.closePath();
-});
+    socket.on('move', function (data) {
+      ctx.beginPath();
+      ctx.moveTo(data.prevX, data.prevY);
+      ctx.lineTo(data.currX, data.currY);
+      ctx.strokeStyle = data.x;
+      ctx.lineWidth = data.y;
+      ctx.stroke();
+      ctx.closePath();
+    });
 
-</script>
-<body onload="init()">
-    <canvas id="can" style="border:2px solid;"></canvas>
-    <div style="position:absolute;top:0%;right:0%;width:30px;height:14%;margin-left:-30px;background:green;" id="green" onclick="color(this)"></div>
-    <div style="position:absolute;top:14%;right:0%;width:30px;height:14%;margin-left:-30px;background:blue;" id="blue" onclick="color(this)"></div>
-    <div style="position:absolute;top:28%;right:0%;width:30px;height:14%;margin-left:-30px;background:red;" id="red" onclick="color(this)"></div>
-    <div style="position:absolute;top:42%;right:0%;width:30px;height:14%;margin-left:-30px;background:yellow;" id="yellow" onclick="color(this)"></div>
-    <div style="position:absolute;top:56%;right:0%;width:30px;height:14%;margin-left:-30px;background:orange;" id="orange" onclick="color(this)"></div>
-    <div style="position:absolute;top:70%;right:0%;width:30px;height:14%;margin-left:-30px;background:black;" id="black" onclick="color(this)"></div>
-    <div style="position:absolute;top:84%;right:0%;width:26px;height:14%;margin-left:-28px;background:white;border:2px solid;" id="white" onclick="color(this)"></div>
-    <img id="canvasimg" style="position:absolute;top:10%;left:52%;" style="display:none;">
-    <input type="button" value="clear" id="clr" size="23" onclick="erase()" style="position:absolute;top:55%;left:15%;">
-</body>
+    </script>
+  </head>
+  <body onload="init()">
+    <canvas id="can"></canvas>
+    <div style="position:fixed;top:0%;right:0%;width:30px;height:14%;margin-left:-30px;background:green;" id="green" onclick="color(this)"></div>
+    <div style="position:fixed;top:14%;right:0%;width:30px;height:14%;margin-left:-30px;background:blue;" id="blue" onclick="color(this)"></div>
+    <div style="position:fixed;top:28%;right:0%;width:30px;height:14%;margin-left:-30px;background:red;" id="red" onclick="color(this)"></div>
+    <div style="position:fixed;top:42%;right:0%;width:30px;height:14%;margin-left:-30px;background:yellow;" id="yellow" onclick="color(this)"></div>
+    <div style="position:fixed;top:56%;right:0%;width:30px;height:14%;margin-left:-30px;background:orange;" id="orange" onclick="color(this)"></div>
+    <div style="position:fixed;top:70%;right:0%;width:30px;height:14%;margin-left:-30px;background:black;" id="black" onclick="color(this)"></div>
+    <div style="position:fixed;top:84%;right:0%;width:26px;height:16%;margin-left:-28px;background:white;border:2px solid;" id="white" onclick="color(this)"></div>
+    <img id="canvasimg" style="position:fixed;top:10%;left:52%;" style="display:none;">
+    <div id="clr" onclick="erase()" style="padding:3px;background-color:#bbb;position:fixed;top:0%;left:0%;">
+      <p>Clear</p>
+    </div>
+  </body>
 </html>
