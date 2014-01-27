@@ -23,8 +23,8 @@ app.use(express.urlencoded());
 app.use(express.cookieParser());
 app.use(express.session({store: new MongoStore({
                            db: 'localstore',
-                           host: db.uristring,
-                           port: 27699
+                           host: '127.0.0.1',
+                           port: 27017
                          }),
                          secret: 'old nassau'}));
 
@@ -103,10 +103,10 @@ connect.once('open', function callback() {
 
   io.sockets.on('connection', function (socket) {
     socket.on('down', function (data) {
-      io.sockets.emit('down', data);
+      socket.broadcast.emit('down', data);
     });
     socket.on('move', function (data) {
-      io.sockets.emit('move', data);
+      socket.broadcast.emit('move', data);
     });
   });
 });
